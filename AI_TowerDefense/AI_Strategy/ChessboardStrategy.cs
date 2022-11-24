@@ -36,7 +36,7 @@ namespace AI_Strategy
 
 			// Don't spawn more soldiers if the number has already reached the hard limit.
 			// Also stop spawning more soldiers if the try-buy-times is bigger than the width.
-			int previousPickedLaneX = 0;
+			int previousPickedLaneX = random.Next(0, PlayerLane.WIDTH);
 			int tryBuyTimes = 0;
 			while (player.EnemyLane.SoldierCount() < k_MaxAllySoldierCount && tryBuyTimes < PlayerLane.WIDTH)
 			{
@@ -135,7 +135,7 @@ namespace AI_Strategy
 			return false;
 		}
 
-		private int getPreferredEnemyLaneToSpawnSoldier(int previousPickedSafestLane)
+		private int getPreferredEnemyLaneToSpawnSoldier(int previousPickedLaneX)
 		{
 			const float adjacentDangerValueMultiplier = 0.5f;
 
@@ -153,54 +153,66 @@ namespace AI_Strategy
 					int translatedY = PlayerLane.HEIGHT - y - 1;
 
 					Cell cell = player.EnemyLane.GetCellAt(x, translatedY);
-					if (cell.Unit is not Tower)
+					if (cell.Unit is Tower)
 					{
-						continue;
-					}
 
-					Tower tower = cell.Unit as Tower;
-					// There is a tower at lane x, increase the lane danger value and the adjacent lane.
+						Tower tower = cell.Unit as Tower;
 
-					laneDangerValues[x] += tower.Health;
-					if (laneDangerValues[x] < lowestDangerValue)
-					{
-						lowestDangerValue = laneDangerValues[x];
-					}
-
-					if (x - 1 >= 0)
-					{
-						laneDangerValues[x - 1] += tower.Health * adjacentDangerValueMultiplier;
-						if (laneDangerValues[x - 1] < lowestDangerValue)
+						// There is a tower at lane x, increase the lane danger value and the adjacent lane.
+						laneDangerValues[x] += tower.Health;
+						if (laneDangerValues[x] < lowestDangerValue)
 						{
-							lowestDangerValue = laneDangerValues[x - 1];
+							lowestDangerValue = laneDangerValues[x];
+						}
+
+						if (x - 1 >= 0)
+						{
+							laneDangerValues[x - 1] += tower.Health * adjacentDangerValueMultiplier;
+							if (laneDangerValues[x - 1] < lowestDangerValue)
+							{
+								lowestDangerValue = laneDangerValues[x - 1];
+							}
+						}
+
+						if (x + 1 < PlayerLane.WIDTH)
+						{
+							laneDangerValues[x + 1] += tower.Health * adjacentDangerValueMultiplier;
+							if (laneDangerValues[x + 1] < lowestDangerValue)
+							{
+								lowestDangerValue = laneDangerValues[x + 1];
+							}
 						}
 					}
-
-					if (x + 1 < PlayerLane.WIDTH)
+					else if (cell.Unit is Soldier)
 					{
-						laneDangerValues[x + 1] += tower.Health * adjacentDangerValueMultiplier;
-						if (laneDangerValues[x + 1] < lowestDangerValue)
-						{
-							lowestDangerValue = laneDangerValues[x + 1];
-						}
+						Soldier soldier = cell.Unit as Soldier;
+
+						// There is a soldier at lane x, increase the interest value by 1.
+						laneInterestValues[x] += 1;
 					}
 				}
 			}
 
 			// We have the lowest danger value recorded, now we just need to pick a random slot with the value.
-			int startX = random.Next(0, PlayerLane.WIDTH);
+			float highestInterestValue = int.MinValue;
+			int highestInterestLaneX = previousPickedLaneX;
+
+			int startX = 0;// random.Next(0, PlayerLane.WIDTH);
 			for (int offset = 0; offset < PlayerLane.WIDTH; offset++)
 			{
 				int x = (startX + offset) % PlayerLane.WIDTH;
 				if (laneDangerValues[x] == lowestDangerValue)
 				{
-					// Return the first lane x with the recorder lowest danger value.
-					return x;
+					if (laneInterestValues[x] > highestInterestValue)
+					{
+						highestInterestValue = laneInterestValues[x];
+						highestInterestLaneX = x;
+					}
 				}
 			}
 
-			// Pick the same lane as the previous call.
-			return previousPickedSafestLane;
+			// Pick the lane with the lowest danger value & the highest interest value.
+			return highestInterestLaneX;
 		}
 	}
 }
