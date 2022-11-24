@@ -36,18 +36,16 @@ namespace AI_Strategy
 
 			// Don't spawn more soldiers if the number has already reached the hard limit.
 			// Also stop spawning more soldiers if the try-buy-times is bigger than the width.
-			int previousPickedSafestLaneX = 0;
+			int previousPickedLaneX = 0;
 			int tryBuyTimes = 0;
 			while (player.EnemyLane.SoldierCount() < k_MaxAllySoldierCount && tryBuyTimes < PlayerLane.WIDTH)
 			{
-				int safestLaneX = getSafestEnemyLane(previousPickedSafestLaneX);
-				var result = player.TryBuySoldier<MySoldier>(safestLaneX);
-
-				// TODO: pick the lane with the most soldiers as well.
+				int bestLaneX = getPreferredEnemyLaneToSpawnSoldier(previousPickedLaneX);
+				var result = player.TryBuySoldier<MySoldier>(bestLaneX);
 
 				if (result == Player.SoldierPlacementResult.Success)
 				{
-					previousPickedSafestLaneX = safestLaneX;
+					previousPickedLaneX = bestLaneX;
 				}
 
 				tryBuyTimes++;
@@ -137,9 +135,12 @@ namespace AI_Strategy
 			return false;
 		}
 
-		private int getSafestEnemyLane(int previousPickedSafestLane)
+		private int getPreferredEnemyLaneToSpawnSoldier(int previousPickedSafestLane)
 		{
 			const float adjacentDangerValueMultiplier = 0.5f;
+
+			// TODO: pick the lane with the most soldiers as well.
+			float[] laneInterestValues = new float[PlayerLane.WIDTH];
 
 			float[] laneDangerValues = new float[PlayerLane.WIDTH];
 			float lowestDangerValue = float.MaxValue;
