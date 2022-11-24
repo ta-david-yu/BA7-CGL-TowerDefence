@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI_TowerDefense\AI_Strategy\AbstractStrategy.cs" />
+    <Compile Include="AI_TowerDefense\AI_Strategy\ChessboardStrategy.cs" />
     <Compile Include="AI_TowerDefense\AI_Strategy\MySoldier.cs" />
     <Compile Include="AI_TowerDefense\AI_Strategy\RandomStrategy.cs" />
     <Compile Include="AI_TowerDefense\AI_Strategy\RandomStrategyLoggerDemo.cs" />
