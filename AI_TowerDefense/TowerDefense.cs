@@ -53,7 +53,7 @@ namespace AI_TowerDefense
             // here you replace the selected strategy with your strategy class(es).
             // Your strategy should at least be able to beat random!
             
-            _playerAStrategy = new RandomStrategyLoggerDemo(_playerA);
+            _playerAStrategy = new ChessboardStrategy(_playerA);
             _playerBStrategy = new RandomStrategyLoggerDemo(_playerB);
         }
 
