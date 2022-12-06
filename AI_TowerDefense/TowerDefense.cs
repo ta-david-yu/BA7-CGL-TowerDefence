@@ -53,8 +53,8 @@ namespace AI_TowerDefense
             // here you replace the selected strategy with your strategy class(es).
             // Your strategy should at least be able to beat random!
             
-            _playerAStrategy = new ChessboardStrategy(_playerA);
-            _playerBStrategy = new ChessboardStrategy(_playerB);
+            _playerAStrategy = new AI_Strategy.DYStrategy.ChessboardStrategy(_playerA);
+            _playerBStrategy = new AI_Strategy.DYStrategy.ChessboardStrategy(_playerB);
         }
 
         public static TowerDefense Instance => instance ??= new TowerDefense();
