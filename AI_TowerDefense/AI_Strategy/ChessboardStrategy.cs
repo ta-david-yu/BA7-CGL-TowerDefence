@@ -16,14 +16,14 @@ namespace AI_Strategy
 			private const int k_DangerTowerPlacementHeight = 2;
 
 			/// <summary>
-			/// We dont create more soldiers if there are more soliders than the value already.
-			/// </summary>
-			private const int k_MaxAllySoldierCount = 80;
-
-			/// <summary>
 			/// We dont build more towers if the tower defense line is further than the height here.
 			/// </summary>
 			private const int k_MaxTowerPlacementHeight = 3;
+
+			/// <summary>
+			/// We dont create more soldiers if there are more soliders than the value already.
+			/// </summary>
+			private const int k_MaxAllySoldierCount = 80;
 
 			public ChessboardStrategy(Player player) : base(player)
 			{
@@ -125,11 +125,13 @@ namespace AI_Strategy
 					for (int x = startX; x < PlayerLane.WIDTH; x += 2)
 					{
 						Cell cell = player.HomeLane.GetCellAt(x, translatedY);
-						if (cell.Unit == null)
+						if (cell.Unit != null)
 						{
-							firstAvailableCell = cell;
-							return true;
+							continue;
 						}
+
+						firstAvailableCell = cell;
+						return true;
 					}
 				}
 
@@ -157,7 +159,6 @@ namespace AI_Strategy
 						Cell cell = player.EnemyLane.GetCellAt(x, translatedY);
 						if (cell.Unit is Tower)
 						{
-
 							Tower tower = cell.Unit as Tower;
 
 							// There is a tower at lane x, increase the lane danger value and the adjacent lane.
@@ -203,14 +204,18 @@ namespace AI_Strategy
 				for (int offset = 0; offset < PlayerLane.WIDTH; offset++)
 				{
 					int x = (startX + offset) % PlayerLane.WIDTH;
-					if (laneDangerValues[x] == lowestDangerValue)
+					if (laneDangerValues[x] != lowestDangerValue)
 					{
-						if (laneInterestValues[x] > highestInterestValue)
-						{
-							highestInterestValue = laneInterestValues[x];
-							highestInterestLaneX = x;
-						}
+						continue;
 					}
+
+					if (laneInterestValues[x] <= highestInterestValue)
+					{
+						continue;
+					}
+
+					highestInterestValue = laneInterestValues[x];
+					highestInterestLaneX = x;
 				}
 
 				// Pick the lane with the lowest danger value & the highest interest value.
